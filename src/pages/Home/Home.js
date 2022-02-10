@@ -43,7 +43,6 @@ function Home({ navigation }) {
     let mounted = true
     getListLast().then((items) => {
       if (mounted) {
-        console.log(items)
         setInfo(items)
       }
     })
