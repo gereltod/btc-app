@@ -8,6 +8,7 @@ module.exports = (api) => {
         {
           alias: {
             components: './src/components',
+            services: './src/services',
             pages: './src/pages',
             theme: './src/theme',
             utils: './src/utils',

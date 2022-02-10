@@ -5,6 +5,7 @@ const colors = {
   lightGrayPurple: '#f7f7fb',
   pink: '#ff3d69',
   gray: '#797777',
+  red: '#FF0000',
 }
 
 export default colors

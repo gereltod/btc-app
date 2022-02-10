@@ -1,12 +1,11 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import {
-  StyleSheet, Text, View, StatusBar, Dimensions,
-} from 'react-native'
+import { StyleSheet, Text, View, StatusBar } from 'react-native'
 import Button from 'components/Button'
 import { colors } from 'theme'
 
-import { LineChart } from 'react-native-chart-kit'
+import { getList, getListLast } from 'services/list'
+import FontIcon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 const styles = StyleSheet.create({
   root: {
@@ -20,68 +19,104 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 20,
   },
+  infoTxt: {
+    fontSize: 20,
+    marginBottom: 10,
+  },
 })
 
-const Home = ({ navigation }) => (
-  <View style={styles.root}>
-    <StatusBar barStyle="light-content" />
-    <View>
-      <Text>Bezier Line Chart</Text>
-      <LineChart
-        data={{
-          labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-          datasets: [
-            {
-              data: [
-                Math.random() * 100,
-                Math.random() * 100,
-                Math.random() * 100,
-                Math.random() * 100,
-                Math.random() * 100,
-                Math.random() * 100,
-              ],
-            },
-          ],
-        }}
-        width={Dimensions.get('window').width} // from react-native
-        height={220}
-        yAxisLabel="$"
-        yAxisSuffix="k"
-        yAxisInterval={1} // optional, defaults to 1
-        chartConfig={{
-          backgroundColor: '#e26a00',
-          backgroundGradientFrom: '#fb8c00',
-          backgroundGradientTo: '#ffa726',
-          decimalPlaces: 2, // optional, defaults to 2dp
-          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          style: {
-            borderRadius: 16,
-          },
-          propsForDots: {
-            r: '6',
-            strokeWidth: '2',
-            stroke: '#ffa726',
-          },
-        }}
-        bezier
-        style={{
-          marginVertical: 8,
-          borderRadius: 16,
+function Home({ navigation }) {
+  const [list, setList] = useState([])
+  const [info, setInfo] = useState([])
+
+  useEffect(() => {
+    let mounted = true
+    getList().then((items) => {
+      if (mounted) {
+        setList(items)
+      }
+    })
+    return (mounted) => (mounted = false)
+  }, [])
+
+  useEffect(() => {
+    let mounted = true
+    getListLast().then((items) => {
+      if (mounted) {
+        console.log(items)
+        setInfo(items)
+      }
+    })
+    return (mounted) => (mounted = false)
+  }, [])
+
+  const getData = async () => {
+    try {
+      getListLast().then((items) => {
+        setInfo(items)
+      })
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  const getDataChange = () => {
+    if (info.length > 0) return info[0].change
+  }
+
+  useEffect(() => {
+    const intervalCall = setInterval(() => {
+      getData()
+    }, 15000)
+    return () => {
+      // clean up
+      clearInterval(intervalCall)
+    }
+  }, [])
+
+  return (
+    <View style={styles.root}>
+      <StatusBar barStyle="light-content" />
+      <Text style={styles.title}>
+        Bitcoin price{' '}
+        {info && (
+          <FontIcon
+            name={
+              getDataChange() > 0
+                ? 'arrow-top-right-bold-outline'
+                : 'arrow-bottom-right-bold-outline'
+            }
+            color={getDataChange() > 0 ? colors.gray : colors.red}
+            size={26}
+            solid
+          />
+        )}
+      </Text>
+
+      {info && (
+        <View>
+          {info.map((data, idx) => {
+            return (
+              <View key={idx}>
+                <Text style={styles.infoTxt}>Currency: {data.code}</Text>
+                <Text style={styles.infoTxt}>Rate: {data.rate} </Text>
+                <Text style={styles.infoTxt}>Change: {data.change}</Text>
+              </View>
+            )
+          })}
+        </View>
+      )}
+      <Button
+        title="Go to Details"
+        color="white"
+        backgroundColor={colors.lightPurple}
+        onPress={() => {
+          navigation.navigate('Details', { from: 'Home' })
         }}
       />
     </View>
-    <Text style={styles.title}>Home</Text>
-    <Button
-      title="Go to Details"
-      color="white"
-      backgroundColor={colors.lightPurple}
-      onPress={() => {
-        navigation.navigate('Details', { from: 'Home' })
-      }}
-    />
-  </View>
-)
+  )
+}
 
 Home.propTypes = {
   navigation: PropTypes.shape({
