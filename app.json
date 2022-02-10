@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "react-native-boilerplate",
-    "slug": "react-native-boilerplate",
+    "name": "Coininfo",
+    "slug": "Coininfo",
     "privacy": "public",
     "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
